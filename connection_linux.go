@@ -6,7 +6,7 @@ import (
 	"os"
 )
 
-type ConnectionLinux struct {
+type Connection struct {
 	ConnectionBase
 	Conn net.Conn
 	Connected bool
@@ -36,27 +36,39 @@ func GetTempPath() string {
 	return "/tmp"
 }
 
-func (c *ConnectionLinux) Open() bool {
+func (c *Connection) Open() error {
 	path := GetTempPath()
 	for i := 0; i < 10; i++ {
 		con, err := net.Dial("unix", path + "/discord-ipc-" + strconv.Itoa(i))
 		if err == nil {
 			c.Conn = con
 			c.Connected = true
-			return true
+			return nil
 		}
 	}
 
-	return true
+	return ErrorDiscordNotFound
 
 }
 
-func (c *ConnectionLinux) Write(data []byte, length uint) bool {
-	_, err := c.Conn.Write(data)
-	return err == nil
+func (c *Connection) Write(data []byte) error {
+	tot, err := c.Conn.Write(data)
+	if err != nil {
+		return err
+	} else if tot <= 0 {
+		// TODO c.Close()
+		return ErrorNoData
+	}
+	return nil
 }
 
-func (c *ConnectionLinux) Read(data []byte, length uint) bool {
-	// TODO
-	return false
+func (c *Connection) Read(data []byte) error {
+	tot, err := c.Conn.Read(data)
+	if err != nil {
+		return err
+	} else if tot <= 0 {
+		// TODO c.Close()
+		return ErrorNoData
+	}
+	return nil
 }

@@ -5,6 +5,8 @@ main
 vendor
 Gopkg.lock
 
+.idea
+
 ### Project files
 speedtest.py
 config.json

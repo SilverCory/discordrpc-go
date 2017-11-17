@@ -4,24 +4,47 @@ import (
 	"github.com/natefinch/npipe"
 	"strconv"
 	"fmt"
+	"errors"
 )
 
-type ConnectionWindows struct {
+type Connection struct {
 	ConnectionBase
 	Conn *npipe.PipeConn
 	Connected bool
 }
 
-func (c *ConnectionWindows) Open() bool {
+func (c *Connection) Open() error {
 
 	for i := 0; i < 10; i++ {
 		con, err := npipe.Dial("\\\\.\\pipe\\discord-ipc-" + strconv.Itoa(i))
 		if err == nil {
 			c.Conn = con
 			c.Connected = true
-			return true
+			return nil
 		}
 	}
 
-	return false
+	return
+}
+
+func (c *Connection) Write(data []byte) error {
+	tot, err := c.Conn.Write(data)
+	if err != nil {
+		return err
+	} else if tot <= 0 {
+		// TODO c.Close()
+		return ErrorNoData
+	}
+	return nil
+}
+
+func (c *Connection) Read(data []byte) error {
+	tot, err := c.Conn.Read(data)
+	if err != nil {
+		return err
+	} else if tot <= 0 {
+		// TODO c.Close()
+		return ErrorNoData
+	}
+	return nil
 }
