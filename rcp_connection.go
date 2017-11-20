@@ -16,7 +16,6 @@ const MaxRpcFrameSize = 64 * 1024
 var (
 	ErrorInvalidState = errors.New("invalid state on read/write")
 	ErrorReadCorrupt  = errors.New("read corrupted")
-	ErrorWriteEncode  = errors.New("write encode error")
 )
 
 type ErrorCode int8
@@ -161,9 +160,7 @@ func (r *RcpConnection) Read() (string, error) {
 
 		switch frame.OpCode {
 		case OpCodeClose:
-			// TODO close message.
-			r.Close()
-			return frame.GetMessage(), errors.New("closing")
+			return frame.GetMessage(), r.Close()
 		case OpCodeFrame:
 			// TODO parse frame.
 			return frame.GetMessage(), nil
@@ -219,15 +216,6 @@ func (r *RcpConnection) writeFrame(code OpCode, data string) error {
 		return err
 	}
 
-	//fmt.Println("data size", len(data))
-	//fmt.Println("Bufsize before truncate", buf.Len())
-	//buf.Truncate(len(data) + 8)
-	//fmt.Println("Bufsize after truncate", buf.Len())
-
-	//if _, err := buf.WriteString(data); err != nil {
-	//	return err
-	//}
-	//
 	if _, err := r.Connection.Write(buf.Bytes()[:header.Length+8]); err != nil {
 		r.Close()
 		return err
