@@ -5,6 +5,11 @@ import (
 	"fmt"
 )
 
+type RichPresenceMessageArgs struct {
+	Pid      int       `json:"pid"`
+	Activity *Activity `json:"activity"`
+}
+
 // A Game struct holds the name of the "playing .." game for a user
 type Activity struct {
 	Details    string     `json:"details,omitempty"`

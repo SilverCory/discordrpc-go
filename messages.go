@@ -19,8 +19,3 @@ type CommandRichPresenceMessage struct {
 	CommandMessage
 	Args *RichPresenceMessageArgs `json:"args"`
 }
-
-type RichPresenceMessageArgs struct {
-	Pid      int       `json:"pid"`
-	Activity *Activity `json:"activity"`
-}
