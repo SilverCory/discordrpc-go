@@ -14,7 +14,7 @@ func TestMeme(t *testing.T) {
 	time.Sleep(time.Second * 3)
 
 	//316245861074206730
-	win := golang_discord_rpc.New("316245861074206730")
+	win := golang_discord_rpc.NewRPCConnection("316245861074206730")
 	err := win.Open()
 	if err != nil {
 		fmt.Println(err)

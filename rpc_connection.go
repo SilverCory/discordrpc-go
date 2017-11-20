@@ -72,7 +72,7 @@ type RPCConnection struct {
 	lastErrorMessage string
 }
 
-func New(ApplicationID string) *RPCConnection {
+func NewRPCConnection(ApplicationID string) *RPCConnection {
 	return &RPCConnection{
 		Connection:       NewConnection(),
 		State:            StateDisconnected,
