@@ -1,0 +1,1 @@
+package golang_discord_rpc
