@@ -12,14 +12,13 @@ type RichPresenceMessageArgs struct {
 
 // A Game struct holds the name of the "playing .." game for a user
 type Activity struct {
-	Details    string     `json:"details,omitempty"`
-	State      string     `json:"state,omitempty"`
-	TimeStamps TimeStamps `json:"timestamps,omitempty"`
-	Assets     Assets     `json:"assets,omitempty"`
-	Secrets    Secrets    `json:"secrets,omitempty"`
-	//Party      Party      `json:"party,omitempty"`
-	// TODO party requires ID not to be null, why no omit empty?
-	Instance bool `json:"instance,omitempty"`
+	Details    string      `json:"details,omitempty"`
+	State      string      `json:"state,omitempty"`
+	TimeStamps *TimeStamps `json:"timestamps,omitempty"`
+	Assets     *Assets     `json:"assets,omitempty"`
+	Secrets    *Secrets    `json:"secrets,omitempty"`
+	Party      *Party      `json:"party,omitempty"`
+	Instance   bool        `json:"instance,omitempty"`
 }
 
 // A TimeStamps struct contains start and end times used in the rich presence "playing .." Game

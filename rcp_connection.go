@@ -63,7 +63,7 @@ const (
 	StateConnected
 )
 
-type RcpConnection struct {
+type RPCConnection struct {
 	io.Closer
 	Connection       ConnectionBase
 	State            State
@@ -72,8 +72,8 @@ type RcpConnection struct {
 	lastErrorMessage string
 }
 
-func New(ApplicationID string) *RcpConnection {
-	return &RcpConnection{
+func New(ApplicationID string) *RPCConnection {
+	return &RPCConnection{
 		Connection:       NewConnection(),
 		State:            StateDisconnected,
 		ApplicationID:    ApplicationID,
@@ -82,7 +82,7 @@ func New(ApplicationID string) *RcpConnection {
 	}
 }
 
-func (r *RcpConnection) Open() error {
+func (r *RPCConnection) Open() error {
 	if r.State == StateConnected {
 		return nil
 	}
@@ -131,7 +131,7 @@ func (r *RcpConnection) Open() error {
 
 }
 
-func (r *RcpConnection) Read() (string, error) {
+func (r *RPCConnection) Read() (string, error) {
 
 	if r.State != StateConnected && r.State != StateSentHandshake {
 		return "", ErrorInvalidState
@@ -183,7 +183,7 @@ func (r *RcpConnection) Read() (string, error) {
 
 }
 
-func (r *RcpConnection) readData(length uint32) (data []byte, err error) {
+func (r *RPCConnection) readData(length uint32) (data []byte, err error) {
 	data = make([]byte, length)
 	_, err = r.Connection.Read(data)
 	if err != nil {
@@ -197,11 +197,11 @@ func (r *RcpConnection) readData(length uint32) (data []byte, err error) {
 	return
 }
 
-func (r *RcpConnection) Write(data string) error {
+func (r *RPCConnection) Write(data string) error {
 	return r.writeFrame(OpCodeFrame, data)
 }
 
-func (r *RcpConnection) writeFrame(code OpCode, data string) error {
+func (r *RPCConnection) writeFrame(code OpCode, data string) error {
 	header := MessageFrame{
 		MessageFrameHeader: MessageFrameHeader{
 			OpCode: code,
@@ -224,7 +224,7 @@ func (r *RcpConnection) writeFrame(code OpCode, data string) error {
 	return nil
 }
 
-func (r *RcpConnection) Close() error {
+func (r *RPCConnection) Close() error {
 	err := r.Connection.Close()
 	r.State = StateDisconnected
 	r.Connection = nil
