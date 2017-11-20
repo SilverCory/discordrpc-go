@@ -16,6 +16,8 @@ type Activity struct {
 	State      string     `json:"state,omitempty"`
 	TimeStamps TimeStamps `json:"timestamps,omitempty"`
 	Assets     Assets     `json:"assets,omitempty"`
+	Secrets    Secrets    `json:"secrets,omitempty"`
+	Party      Party      `json:"party,omitempty"`
 	Instance   bool       `json:"instance,omitempty"`
 }
 
@@ -48,7 +50,36 @@ type Assets struct {
 	SmallText    string `json:"small_text,omitempty"`
 }
 
-// TODO implement party and secrets.
+// A Party struct contains information about the current user's party.
+type Party struct {
+	ID   string
+	Size int
+	Max  int
+}
+
+// UnmarshalJSON unmarshals JSON into a Party struct
+func (p *Party) MarshalJSON() ([]byte, error) {
+	temp := struct {
+		ID   string `json:"id"`
+		Size []int  `json:"size"`
+	}{
+		p.ID,
+		make([]int, 1, 2),
+	}
+
+	temp.Size[0] = p.Size
+	if 0 < p.Max {
+		temp.Size[1] = p.Max
+	}
+	return json.Marshal(&temp)
+}
+
+// A Secrets struct contains the various secrets used to allow for people to spectate, join and whatever match is?
+type Secrets struct {
+	Match    string `json:"match,omitempty"`
+	Join     string `json:"join,omitempty"`
+	Spectate string `json:"spectate,omitempty"`
+}
 
 var nonceVal = 0
 
