@@ -17,8 +17,9 @@ type Activity struct {
 	TimeStamps TimeStamps `json:"timestamps,omitempty"`
 	Assets     Assets     `json:"assets,omitempty"`
 	Secrets    Secrets    `json:"secrets,omitempty"`
-	Party      Party      `json:"party,omitempty"`
-	Instance   bool       `json:"instance,omitempty"`
+	//Party      Party      `json:"party,omitempty"`
+	// TODO party requires ID not to be null, why no omit empty?
+	Instance bool `json:"instance,omitempty"`
 }
 
 // A TimeStamps struct contains start and end times used in the rich presence "playing .." Game
