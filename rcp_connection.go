@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"strings"
 )
 
@@ -64,6 +65,7 @@ const (
 )
 
 type RcpConnection struct {
+	io.Closer
 	Connection       ConnectionBase
 	State            State
 	ApplicationID    string
@@ -118,7 +120,7 @@ func (r *RcpConnection) Open() error {
 		}
 
 		if err := r.writeFrame(OpCodeHandshake, string(data)); err != nil {
-			// TODO r.Close();
+			r.Close()
 			return err
 		} else {
 			r.State = StateSentHandshake
@@ -160,7 +162,7 @@ func (r *RcpConnection) Read() (string, error) {
 		switch frame.OpCode {
 		case OpCodeClose:
 			// TODO close message.
-			// TODO close.
+			r.Close()
 			return frame.GetMessage(), errors.New("closing")
 		case OpCodeFrame:
 			// TODO parse frame.
@@ -174,7 +176,7 @@ func (r *RcpConnection) Read() (string, error) {
 		default:
 			r.lastErrorMessage = "Bad ipc frame"
 			r.lastErrorCode = CodeReadCorrupt
-			// TODO r.Close()
+			r.Close()
 			return frame.GetMessage(), ErrorReadCorrupt
 		}
 
@@ -189,7 +191,7 @@ func (r *RcpConnection) readData(length uint32) (data []byte, err error) {
 	_, err = r.Connection.Read(data)
 	if err != nil {
 		if !r.Connection.isOpen() {
-			// TODO r.Close()
+			r.Close()
 			r.lastErrorCode = CodePipeClosed
 			r.lastErrorMessage = "Pipe closed"
 		}
@@ -227,9 +229,16 @@ func (r *RcpConnection) writeFrame(code OpCode, data string) error {
 	//}
 	//
 	if _, err := r.Connection.Write(buf.Bytes()[:header.Length+8]); err != nil {
-		// TODO r.Close()
+		r.Close()
 		return err
 	}
 
 	return nil
+}
+
+func (r *RcpConnection) Close() error {
+	err := r.Connection.Close()
+	r.State = StateDisconnected
+	r.Connection = nil
+	return err
 }

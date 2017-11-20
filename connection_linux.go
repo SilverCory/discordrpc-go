@@ -74,3 +74,9 @@ func (c *Connection) Read(data []byte) (int, error) {
 	}
 	return tot, nil
 }
+
+func (c *Connection) Close() error {
+	err := c.Conn.Close()
+	c.Conn = nil
+	return err
+}
