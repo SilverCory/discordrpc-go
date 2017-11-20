@@ -1,17 +1,21 @@
 package golang_discord_rpc
 
 import (
-	"errors"
-	"encoding/binary"
 	"bytes"
+	"encoding/binary"
+	"encoding/json"
+	"errors"
+	"fmt"
+	"strings"
 )
 
+const RpcVersion = 1
 const MaxRpcFrameSize = 64 * 1024
 
 var (
 	ErrorInvalidState = errors.New("invalid state on read/write")
-	ErrorReadCorrupt = errors.New("read corrupted")
-	ErrorWriteEncode = errors.New("write encode error")
+	ErrorReadCorrupt  = errors.New("read corrupted")
+	ErrorWriteEncode  = errors.New("write encode error")
 )
 
 type ErrorCode int8
@@ -23,6 +27,7 @@ const (
 )
 
 type OpCode uint32
+
 const (
 	OpCodeHandshake OpCode = iota
 	OpCodeFrame
@@ -38,10 +43,19 @@ type MessageFrameHeader struct {
 
 type MessageFrame struct {
 	MessageFrameHeader
-	Message string
+	Message [MaxRpcFrameSize]byte
+}
+
+func (m *MessageFrame) GetMessage() string {
+	return string(m.Message[:])
+}
+
+func (m *MessageFrame) SetMessage(str string) {
+	copy(m.Message[:], str)
 }
 
 type State uint32
+
 const (
 	StateDisconnected State = iota
 	StateSentHandshake
@@ -50,19 +64,19 @@ const (
 )
 
 type RcpConnection struct {
-	Connection ConnectionBase
-	State State
-	ApplicationID string
-	lastErrorCode ErrorCode
+	Connection       ConnectionBase
+	State            State
+	ApplicationID    string
+	lastErrorCode    ErrorCode
 	lastErrorMessage string
 }
 
 func New(ApplicationID string) *RcpConnection {
 	return &RcpConnection{
-		Connection: NewConnection(),
-		State: StateDisconnected,
-		ApplicationID: ApplicationID,
-		lastErrorCode: 0,
+		Connection:       NewConnection(),
+		State:            StateDisconnected,
+		ApplicationID:    ApplicationID,
+		lastErrorCode:    0,
 		lastErrorMessage: "",
 	}
 }
@@ -79,10 +93,40 @@ func (r *RcpConnection) Open() error {
 	}
 
 	if r.State == StateSentHandshake {
+		str, err := r.Read()
+		if err != nil {
+			return err
+		}
 
+		msg := &CommandEventMessage{}
+		if err := json.Unmarshal([]byte(str), msg); err != nil {
+			return err
+		}
+
+		if strings.EqualFold(msg.Command, "DISPATCH") && strings.EqualFold(msg.Event, "READY") {
+			r.State = StateConnected
+			// TODO r.onConnect();
+		}
+	} else {
+		data, err := json.Marshal(&HandshakeMessage{
+			Version:       RpcVersion,
+			ApplicationID: r.ApplicationID,
+		})
+
+		if err != nil {
+			return err
+		}
+
+		if err := r.writeFrame(OpCodeHandshake, string(data)); err != nil {
+			// TODO r.Close();
+			return err
+		} else {
+			r.State = StateSentHandshake
+			fmt.Println("Sent handshake.")
+		}
 	}
 
-	return errors.New("unimplemented")
+	return nil
 
 }
 
@@ -93,7 +137,7 @@ func (r *RcpConnection) Read() (string, error) {
 	}
 
 	var frame MessageFrame
-	for {
+	for { // this is blocking?
 		data, err := r.readData(8) // TODO sizeof MessageFrameHeader
 		if err != nil {
 			return "", err
@@ -110,41 +154,39 @@ func (r *RcpConnection) Read() (string, error) {
 				r.lastErrorMessage = "Partial data in frame"
 				return "", err
 			}
-			frame.Message = string(data)
+			frame.SetMessage(string(data))
 		}
 
 		switch frame.OpCode {
-			case OpCodeClose:
-				// TODO close message.
-				// TODO close.
-				return "", nil
-			case OpCodeFrame:
-				// TODO parse frame.
-				return "", nil
-			case OpCodePing:
-				frame.OpCode = OpCodePong
-				// TODO writeFrame
-				break
-			case OpCodePong:
-				break
-			case OpCodeHandshake:
-			default:
-				r.lastErrorMessage = "Bad ipc frame"
-				r.lastErrorCode = CodeReadCorrupt
-				// TODO r.Close()
-				return "", ErrorReadCorrupt
-
+		case OpCodeClose:
+			// TODO close message.
+			// TODO close.
+			return frame.GetMessage(), errors.New("closing")
+		case OpCodeFrame:
+			// TODO parse frame.
+			return frame.GetMessage(), nil
+		case OpCodePing:
+			r.writeFrame(OpCodePong, frame.GetMessage())
+			break
+		case OpCodePong:
+			break
+		case OpCodeHandshake:
+		default:
+			r.lastErrorMessage = "Bad ipc frame"
+			r.lastErrorCode = CodeReadCorrupt
+			// TODO r.Close()
+			return frame.GetMessage(), ErrorReadCorrupt
 		}
 
 	}
 
-	return frame.Message, nil
+	return frame.GetMessage(), nil
 
 }
 
 func (r *RcpConnection) readData(length uint32) (data []byte, err error) {
 	data = make([]byte, length)
-	err = r.Connection.Read(data)
+	_, err = r.Connection.Read(data)
 	if err != nil {
 		if !r.Connection.isOpen() {
 			// TODO r.Close()
@@ -157,26 +199,37 @@ func (r *RcpConnection) readData(length uint32) (data []byte, err error) {
 }
 
 func (r *RcpConnection) Write(data string) error {
+	return r.writeFrame(OpCodeFrame, data)
+}
 
-	header := MessageFrameHeader{
-		OpCode:OpCodeFrame,
-		Length: uint32(len(data) + 8),
+func (r *RcpConnection) writeFrame(code OpCode, data string) error {
+	header := MessageFrame{
+		MessageFrameHeader: MessageFrameHeader{
+			OpCode: code,
+			Length: uint32(len(data)),
+		},
 	}
+
+	header.SetMessage(data)
 
 	buf := new(bytes.Buffer)
 	if err := binary.Write(buf, binary.LittleEndian, header); err != nil {
 		return err
 	}
 
-	if _, err := buf.WriteString(data); err != nil {
+	//fmt.Println("data size", len(data))
+	//fmt.Println("Bufsize before truncate", buf.Len())
+	//buf.Truncate(len(data) + 8)
+	//fmt.Println("Bufsize after truncate", buf.Len())
+
+	//if _, err := buf.WriteString(data); err != nil {
+	//	return err
+	//}
+	//
+	if _, err := r.Connection.Write(buf.Bytes()[:header.Length+8]); err != nil {
+		// TODO r.Close()
 		return err
 	}
 
-	if err := r.Connection.Write(buf.Bytes()); err != nil {
-		// TODO r.Close()
-		return ErrorWriteEncode
-	}
-
 	return nil
-
 }

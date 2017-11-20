@@ -1,14 +1,15 @@
 package golang_discord_rpc
 
 import (
+	"fmt"
 	"net"
-	"strconv"
 	"os"
+	"strconv"
 )
 
 type Connection struct {
 	ConnectionBase
-	Conn net.Conn
+	Conn      net.Conn
 	Connected bool
 }
 
@@ -39,7 +40,7 @@ func GetTempPath() string {
 func (c *Connection) Open() error {
 	path := GetTempPath()
 	for i := 0; i < 10; i++ {
-		con, err := net.Dial("unix", path + "/discord-ipc-" + strconv.Itoa(i))
+		con, err := net.Dial("unix", path+"/discord-ipc-"+strconv.Itoa(i))
 		if err == nil {
 			c.Conn = con
 			c.Connected = true
@@ -51,24 +52,25 @@ func (c *Connection) Open() error {
 
 }
 
-func (c *Connection) Write(data []byte) error {
+func (c *Connection) Write(data []byte) (int, error) {
+	fmt.Printf("%X\n\n", data)
 	tot, err := c.Conn.Write(data)
 	if err != nil {
-		return err
+		return tot, err
 	} else if tot <= 0 {
 		// TODO c.Close()
-		return ErrorNoData
+		return tot, ErrorNoData
 	}
-	return nil
+	return tot, nil
 }
 
-func (c *Connection) Read(data []byte) error {
+func (c *Connection) Read(data []byte) (int, error) {
 	tot, err := c.Conn.Read(data)
 	if err != nil {
-		return err
+		return tot, err
 	} else if tot <= 0 {
 		// TODO c.Close()
-		return ErrorNoData
+		return tot, ErrorNoData
 	}
-	return nil
+	return tot, nil
 }

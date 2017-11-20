@@ -1,20 +1,21 @@
 package golang_discord_rpc
 
-import "errors"
+import (
+	"errors"
+	"io"
+)
 
 var (
 	ErrorDiscordNotFound = errors.New("could not find discord")
-	ErrorNoData = errors.New("no data")
+	ErrorNoData          = errors.New("no data")
 )
 
 type ConnectionBase interface {
+	io.ReadWriteCloser
 	isOpen() bool
 	Open() error
-	Close() error
-	Write(data []byte) error
-	Read(data []byte) error
 }
 
 func NewConnection() ConnectionBase {
-	return Connection{}.ConnectionBase
+	return &Connection{}
 }

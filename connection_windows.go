@@ -1,19 +1,19 @@
 package golang_discord_rpc
 
 import (
+	"errors"
+	"fmt"
 	"github.com/natefinch/npipe"
 	"strconv"
-	"fmt"
-	"errors"
 )
 
 type Connection struct {
 	ConnectionBase
-	Conn *npipe.PipeConn
+	Conn      *npipe.PipeConn
 	Connected bool
 }
 
-func (c *Connection) Open() error {
+func (c Connection) Open() error {
 
 	for i := 0; i < 10; i++ {
 		con, err := npipe.Dial("\\\\.\\pipe\\discord-ipc-" + strconv.Itoa(i))
@@ -27,24 +27,24 @@ func (c *Connection) Open() error {
 	return
 }
 
-func (c *Connection) Write(data []byte) error {
+func (c Connection) Write(data []byte) (int, error) {
 	tot, err := c.Conn.Write(data)
 	if err != nil {
-		return err
+		return tot, err
 	} else if tot <= 0 {
 		// TODO c.Close()
-		return ErrorNoData
+		return tot, ErrorNoData
 	}
-	return nil
+	return tot, nil
 }
 
-func (c *Connection) Read(data []byte) error {
+func (c Connection) Read(data []byte) (int, error) {
 	tot, err := c.Conn.Read(data)
 	if err != nil {
-		return err
+		return tot, err
 	} else if tot <= 0 {
 		// TODO c.Close()
-		return ErrorNoData
+		return tot, ErrorNoData
 	}
-	return nil
+	return tot, nil
 }
