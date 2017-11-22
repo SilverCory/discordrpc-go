@@ -58,7 +58,7 @@ func (c *Connection) Write(data []byte) (int, error) {
 	if err != nil {
 		return tot, err
 	} else if tot <= 0 {
-		// TODO c.Close()
+		c.Close()
 		return tot, ErrorNoData
 	}
 	return tot, nil
@@ -69,7 +69,7 @@ func (c *Connection) Read(data []byte) (int, error) {
 	if err != nil {
 		return tot, err
 	} else if tot <= 0 {
-		// TODO c.Close()
+		c.Close()
 		return tot, ErrorNoData
 	}
 	return tot, nil
