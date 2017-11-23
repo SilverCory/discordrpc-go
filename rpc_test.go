@@ -14,7 +14,7 @@ func TestMeme(t *testing.T) {
 	time.Sleep(time.Second * 3)
 
 	//316245861074206730
-	win := golang_discord_rpc.NewRPCConnection("316245861074206730")
+	win := golang_discord_rpc.NewRPCConnection("368924690946850817")
 	err := win.Open()
 	if err != nil {
 		fmt.Println(err)
@@ -33,9 +33,15 @@ func TestMeme(t *testing.T) {
 			Args: &golang_discord_rpc.RichPresenceMessageArgs{
 				Pid: os.Getpid(),
 				Activity: &golang_discord_rpc.Activity{
-					Details:  "Dankest memes",
-					State:    "done",
+					Details:  "Dean",
+					State:    "Proud To Be A Developer ",
 					Instance: false,
+					Assets: &golang_discord_rpc.Assets{
+						LargeText: "Unknown Album",
+						LargeImageID: "unknown",
+						SmallText: "Dank Memes",
+						SmallImageID: "default",
+					},
 				},
 			},
 		}
