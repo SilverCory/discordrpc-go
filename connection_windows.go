@@ -1,4 +1,4 @@
-package golang_discord_rpc
+package go_discordrpc
 
 import (
 	"gopkg.in/natefinch/npipe.v2"

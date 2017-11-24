@@ -1,4 +1,4 @@
-package golang_discord_rpc_test
+package go_discordrpc_test
 
 import (
 	"encoding/json"
