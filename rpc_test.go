@@ -3,7 +3,7 @@ package golang_discord_rpc_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/SilverCory/golang-discord-rpc"
+	"github.com/SilverCory/golang_discord_rpc"
 	"os"
 	"testing"
 	"time"
