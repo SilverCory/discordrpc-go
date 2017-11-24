@@ -8,6 +8,7 @@ import (
 // TODO updateConnection
 // TODO wait for io?
 // TODO registering
+// TODO reconnecting
 
 type API struct {
 	Connection *RPCConnection
@@ -21,8 +22,12 @@ func New(ApplicationID string) (*API, error) {
 	return api, nil
 }
 
+func (a *API) Open() error {
+	return a.Connection.Open()
+}
+
 func (a *API) IsOpen() bool {
-	return a.Connection != nil && a.Connection.Connection.isOpen()
+	return a.Connection != nil && a.Connection.Connection != nil && a.Connection.Connection.isOpen()
 }
 
 func (a *API) GetLastErrorMessage() string {
