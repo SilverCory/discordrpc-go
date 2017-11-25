@@ -27,7 +27,7 @@ func (a *API) Open() error {
 }
 
 func (a *API) IsOpen() bool {
-	return a.Connection != nil && a.Connection.Connection != nil && a.Connection.Connection.isOpen()
+	return a.Connection != nil && a.Connection.IsOpen()
 }
 
 func (a *API) GetLastErrorMessage() string {

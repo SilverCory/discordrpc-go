@@ -131,6 +131,10 @@ func (r *RPCConnection) Open() error {
 
 }
 
+func (r *RPCConnection) IsOpen() bool {
+	return r.Connection != nil && r.State == StateConnected && r.Connection.isOpen()
+}
+
 func (r *RPCConnection) Read() (string, error) {
 
 	if r.State != StateConnected && r.State != StateSentHandshake {
