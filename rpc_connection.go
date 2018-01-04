@@ -139,7 +139,7 @@ func (r *RPCConnection) Open() error {
 }
 
 func (r *RPCConnection) IsOpen() bool {
-	return r.State == StateConnected && r.Connection != nil && r.Connection.isOpen()
+	return r.State != StateDisconnected && r.Connection != nil && r.Connection.isOpen()
 }
 
 func (r *RPCConnection) Read() (string, error) {
