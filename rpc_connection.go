@@ -65,6 +65,7 @@ const (
 
 type RPCConnection struct {
 	io.Closer
+	Opening          bool
 	Connection       ConnectionBase
 	State            State
 	ApplicationID    string
@@ -82,6 +83,12 @@ func NewRPCConnection(ApplicationID string) *RPCConnection {
 }
 
 func (r *RPCConnection) Open() error {
+
+	r.Opening = true
+	defer func() {
+		r.Opening = false
+	}()
+
 	if r.State == StateConnected {
 		return nil
 	}
@@ -202,7 +209,7 @@ func (r *RPCConnection) readData(length uint32) (data []byte, err error) {
 }
 
 func (r *RPCConnection) Write(data string) error {
-	if !(r.IsOpen()) {
+	if !r.IsOpen() && !r.Opening {
 		r.Close()
 		if err := r.Open(); err != nil {
 			return err
