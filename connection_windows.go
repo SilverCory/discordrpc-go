@@ -26,6 +26,10 @@ func (c *Connection) Open() error {
 	return ErrorDiscordNotFound
 }
 
+func (c *Connection) isOpen() bool {
+	return c.Connected
+}
+
 func (c *Connection) Write(data []byte) (int, error) {
 	conn := c.Conn
 	tot, err := conn.Write(data)
@@ -52,5 +56,6 @@ func (c *Connection) Read(data []byte) (int, error) {
 func (c *Connection) Close() error {
 	err := c.Conn.Close()
 	c.Conn = nil
+	c.Connected = false
 	return err
 }

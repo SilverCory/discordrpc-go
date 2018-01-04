@@ -52,6 +52,10 @@ func (c *Connection) Open() error {
 
 }
 
+func (c *Connection) isOpen() bool {
+	return c.Connected
+}
+
 func (c *Connection) Write(data []byte) (int, error) {
 	fmt.Printf("%X\n\n", data)
 	tot, err := c.Conn.Write(data)
@@ -72,6 +76,7 @@ func (c *Connection) Read(data []byte) (int, error) {
 		c.Close()
 		return tot, ErrorNoData
 	}
+	c.Connected = false
 	return tot, nil
 }
 
