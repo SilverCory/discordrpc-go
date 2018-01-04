@@ -1,4 +1,4 @@
-package go_discordrpc_test
+package discordrpc_test
 
 import (
 	"encoding/json"
@@ -37,9 +37,9 @@ func TestMeme(t *testing.T) {
 					State:    "Proud To Be A Developer ",
 					Instance: false,
 					Assets: &golang_discord_rpc.Assets{
-						LargeText: "Unknown Album",
+						LargeText:    "Unknown Album",
 						LargeImageID: "unknown",
-						SmallText: "Dank Memes",
+						SmallText:    "Dank Memes",
 						SmallImageID: "default",
 					},
 				},

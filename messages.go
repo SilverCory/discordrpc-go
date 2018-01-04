@@ -1,4 +1,4 @@
-package go_discordrpc
+package discordrpc
 
 type HandshakeMessage struct {
 	Version       int    `json:"v"`

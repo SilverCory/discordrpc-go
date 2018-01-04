@@ -1,4 +1,4 @@
-package golang_discord_rpc
+package discordrpc
 
 import (
 	"fmt"

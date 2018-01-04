@@ -1,4 +1,4 @@
-package go_discordrpc
+package discordrpc
 
 import (
 	"gopkg.in/natefinch/npipe.v2"
@@ -15,7 +15,7 @@ type Connection struct {
 func (c *Connection) Open() error {
 
 	for i := 0; i < 10; i++ {
-		con, err := npipe.DialTimeout(`\\.\pipe\discord-ipc-` + strconv.Itoa(i), 1 * time.Second)
+		con, err := npipe.DialTimeout(`\\.\pipe\discord-ipc-`+strconv.Itoa(i), 1*time.Second)
 		if err == nil {
 			c.Conn = con
 			c.Connected = true
