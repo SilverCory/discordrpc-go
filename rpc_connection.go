@@ -242,7 +242,10 @@ func (r *RPCConnection) writeFrame(code OpCode, data string) error {
 }
 
 func (r *RPCConnection) Close() error {
-	err := r.Connection.Close()
+	var err error
+	if r.Connection != nil {
+		err = r.Connection.Close()
+	}
 	r.State = StateDisconnected
 	r.Connection = nil
 	return err
