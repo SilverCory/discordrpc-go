@@ -132,7 +132,7 @@ func (r *RPCConnection) Open() error {
 }
 
 func (r *RPCConnection) IsOpen() bool {
-	return r.Connection != nil && r.State == StateConnected && r.Connection.isOpen()
+	return r.State == StateConnected && r.Connection != nil && r.Connection.isOpen()
 }
 
 func (r *RPCConnection) Read() (string, error) {
@@ -202,8 +202,8 @@ func (r *RPCConnection) readData(length uint32) (data []byte, err error) {
 }
 
 func (r *RPCConnection) Write(data string) error {
-	if !(r.Connection.isOpen()) {
-		if err := r.Connection.Open(); err != nil {
+	if !(r.IsOpen()) {
+		if err := r.Open(); err != nil {
 			return err
 		}
 	}
