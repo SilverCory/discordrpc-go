@@ -203,6 +203,7 @@ func (r *RPCConnection) readData(length uint32) (data []byte, err error) {
 
 func (r *RPCConnection) Write(data string) error {
 	if !(r.IsOpen()) {
+		r.Close()
 		if err := r.Open(); err != nil {
 			return err
 		}
