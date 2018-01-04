@@ -74,7 +74,6 @@ type RPCConnection struct {
 
 func NewRPCConnection(ApplicationID string) *RPCConnection {
 	return &RPCConnection{
-		Connection:       NewConnection(),
 		State:            StateDisconnected,
 		ApplicationID:    ApplicationID,
 		lastErrorCode:    0,
@@ -88,6 +87,7 @@ func (r *RPCConnection) Open() error {
 	}
 
 	if r.State == StateDisconnected {
+		r.Connection = NewConnection()
 		if err := r.Connection.Open(); err != nil {
 			return err
 		}
