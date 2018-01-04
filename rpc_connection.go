@@ -202,6 +202,11 @@ func (r *RPCConnection) readData(length uint32) (data []byte, err error) {
 }
 
 func (r *RPCConnection) Write(data string) error {
+	if !(r.Connection.isOpen()) {
+		if err := r.Connection.Open(); err != nil {
+			return err
+		}
+	}
 	return r.writeFrame(OpCodeFrame, data)
 }
 
