@@ -241,9 +241,8 @@ func (r *RPCConnection) writeFrame(code OpCode, data string) error {
 	return nil
 }
 
-func (r *RPCConnection) Close() error {
-	var err error
-	if r.Connection != nil {
+func (r *RPCConnection) Close() (err error) {
+	if r != nil && r.Connection != nil {
 		err = r.Connection.Close()
 	}
 	r.State = StateDisconnected
